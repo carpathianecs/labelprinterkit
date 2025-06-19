@@ -162,11 +162,13 @@ class QRCode(Item):
 
 
 class Box(Item):
-    def __init__(self, height: int, *items: ItemType, vertical: bool = False, left_padding: int = 0):
+    def __init__(self, height: int, *items: ItemType, vertical: bool = False, left_padding: int = 0, right_padding: int = 0, rotate: bool = False):
         self.height = height
         self.items = items
         self._vertical = vertical
         self._left_padding = left_padding
+        self._right_padding = right_padding
+        self.rotate = rotate
 
     def render(self) -> Image:
         rendered_images = [item.render() for item in self.items]
@@ -185,8 +187,14 @@ class Box(Item):
             for rendered_image in rendered_images:
                 image.paste(rendered_image, (ypos, 0))
                 ypos += rendered_image.size[0]
+        if self.rotate:
+            image = image.rotate(90, Image.NEAREST, expand=1) #VP
+            print("Rotating")
+        if self._right_padding != 0:
+            w, h = image.size
+            print(w, h, w-self._right_padding)
+            image = image.crop((0, 0, w-self._right_padding, h))
         return image
-
 
 class Label(BasePage):
     def __init__(self, item: ItemType):
